@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: initial-schema
+      author: author
+      changes:
+        - createTable:
+            tableName: processed_data
+            columns:
+              - column:
+                  name:  id
+                  type:  varchar(255)
+              - column:
+                  name:  data
+                  type:  varchar(255)
+              - column:
+                  name:  processing_timestamp
+                  type:  timestamp

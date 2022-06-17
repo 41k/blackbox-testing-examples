@@ -1,0 +1,32 @@
+spring:
+  main.allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:mariadb://${embedded.mariadb.host}:${embedded.mariadb.port}/${embedded.mariadb.schema}
+    username: ${embedded.mariadb.user}
+    password: ${embedded.mariadb.password}
+  kafka:
+    bootstrap-servers: ${embedded.kafka.brokerList}
+    consumer.properties:
+      auto.offset.reset: earliest
+      allow.auto.create.topics: false
+  cloud.stream:
+    function:
+      definition: dataProcessingFlow
+    bindings:
+      dataProcessingFlow-in-0:
+        destination: topic-a
+        group: ${spring.application.name}_topic_a
+
+kafka.producers:
+  topic:
+    data-processing-flow:
+      topic-name: topic-b
+  settings:
+    bootstrap.servers: ${embedded.kafka.brokerList}
+
+thirdparty-service:
+  url: http://localhost:${wiremock.server.port}/additional-data/
+  connection-timeout-millis: 10000
+  read-timeout-millis: 10000
+  retry-max: 2
+  retry-backoff-millis: 50

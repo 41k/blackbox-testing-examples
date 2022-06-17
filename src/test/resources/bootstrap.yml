@@ -1,0 +1,3 @@
+spring.application.name: data-processing-service
+
+embedded.kafka.topicsToCreate: topic-a, topic-b
