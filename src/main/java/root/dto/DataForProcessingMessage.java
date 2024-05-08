@@ -1,15 +1,15 @@
 package root.dto;
 
-import lombok.Data;
+import lombok.Value;
 import root.model.DataForProcessing;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Data
+@Value
 public class DataForProcessingMessage {
 
-    private String data;
-    private String additionalDataId;
+    String data;
+    String additionalDataId;
 
     public boolean isValid() {
         return isNotBlank(data) && isNotBlank(additionalDataId);

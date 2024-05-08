@@ -1,12 +1,15 @@
-package blackbox
+package tests.groovy.blackbox
 
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
-import static TestConstants.*
 import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static org.apache.http.HttpStatus.SC_OK
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import static tests.groovy.TestConstants.*
 
 class Flow2BlackboxTest extends BaseBlackboxTest {
 
@@ -18,7 +21,7 @@ class Flow2BlackboxTest extends BaseBlackboxTest {
     """ as String
 
     @Autowired
-    KafkaProducer kafkaProducer
+    private KafkaProducer kafkaProducer
 
     @Value('${spring.cloud.stream.bindings.dataProcessingFlow-in-0.destination}')
     String dataProcessingFlowInputTopic
@@ -30,10 +33,9 @@ class Flow2BlackboxTest extends BaseBlackboxTest {
         and: 'mock for successful additional data retrieval from third-party service'
         stubFor(get(urlPathEqualTo(THIRD_PARTY_SERVICE_ADDITIONAL_DATA_URI))
                 .willReturn(aResponse()
-                        .withStatus(200)
-                        .withBody(THIRD_PARTY_SERVICE_RESPONSE_BODY)
-                        .withHeader('Content-Type', JSON_CONTENT_TYPE)
-                        .withHeader('Connection', 'close')))
+                        .withStatus(SC_OK)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBody(THIRD_PARTY_SERVICE_RESPONSE_BODY)))
 
         when: 'message with data for processing is coming'
         kafkaProducer.send(new ProducerRecord<String, String>(dataProcessingFlowInputTopic, null, DATA_FOR_PROCESSING_MESSAGE))
@@ -42,12 +44,11 @@ class Flow2BlackboxTest extends BaseBlackboxTest {
         POLLING_CONDITIONS.eventually {
             def processedData = processedDataRepository.findAll()
             assert processedData.size() == 1
-            assert processedData.get(0).data == PROCESSED_DATA_AS_STRING
-            assert processedData.get(0).processingTimestamp == PROCESSING_TIMESTAMP
+            assert processedData.get(0).equals(PROCESSED_DATA)
         }
 
-        and: 'processed data is sent to subsequent kafka topic for further processing'
-        dataProcessingOutputKafkaConsumer.waitAndAssertMessageSent(PROCESSED_DATA_MESSAGE_AS_JSON)
+        and: 'processed data is sent to output kafka topic for further processing'
+        dataProcessingOutputKafkaConsumer.waitAndAssertMessagesSent([PROCESSED_DATA_MESSAGE])
     }
 
     def 'should skip invalid message and perform no processing'() {
@@ -58,12 +59,12 @@ class Flow2BlackboxTest extends BaseBlackboxTest {
         kafkaProducer.send(new ProducerRecord<String, String>(dataProcessingFlowInputTopic, null, '{}'))
 
         and:
-        sleep(1000L)
+        sleep(2000L)
 
         then: 'no processed data is persisted'
         processedDataRepository.findAll().isEmpty()
 
-        and: 'no processed data is sent to subsequent kafka topic for further processing'
+        and: 'no processed data is sent to output kafka topic for further processing'
         dataProcessingOutputKafkaConsumer.assertNoMessageSent()
     }
 }

@@ -4,7 +4,7 @@
 ## Description
 
 This ```Spring Boot``` application shows blackbox testing approach for several commonly used data processing flows using the next technologies stack:
-- ```Groovy Spock``` is used as general unit-testing framework
+- ```Groovy Spock (package tests.groovy.*)``` and ```JUnit (package tests.java.*)``` are used as general unit-testing frameworks
 - ```Rest Assured``` is used for performing HTTP requests to the application under the test and assertion of responses
 - ```Wiremock``` is used for mocking of communication via HTTP with 3rd party services
 - ```Testcontainers``` framework is used for infrastructure establishment (Database, Kafka broker etc.) which is used during testing
@@ -13,7 +13,7 @@ This ```Spring Boot``` application shows blackbox testing approach for several c
 
 ## Flow 1
 
-Blackbox tests for the flow can be found in ```src/test/groovy/blackbox/Flow1BlackboxTest.groovy```
+Blackbox tests for the flow can be found in ```Flow1BlackboxTest```
 
 ### Steps:
 1. Application receives ```DataProcessingRequest``` via HTTP endpoint ```POST /api/v1/processing```
@@ -25,7 +25,7 @@ Blackbox tests for the flow can be found in ```src/test/groovy/blackbox/Flow1Bla
 
 ## Flow 2
 
-Blackbox tests for the flow can be found in ```src/test/groovy/blackbox/Flow2BlackboxTest.groovy```
+Blackbox tests for the flow can be found in ```Flow2BlackboxTest```
 
 ### Steps:
 1. Application reads ```DataForProcessingMessage``` from Kafka topic ```topic-a```
@@ -37,4 +37,4 @@ Blackbox tests for the flow can be found in ```src/test/groovy/blackbox/Flow2Bla
 
 ## Cache
 
-Test example for cache functionality can be found in ```src/test/groovy/blackbox/ThirdPartyServiceClientCacheTest.groovy```
+Test example for cache functionality can be found in ```ThirdPartyServiceClientCacheTest```

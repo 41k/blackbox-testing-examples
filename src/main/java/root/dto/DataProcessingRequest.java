@@ -1,16 +1,16 @@
 package root.dto;
 
-import lombok.Data;
+import lombok.Value;
 import root.model.DataForProcessing;
 
 import javax.validation.constraints.NotBlank;
 
-@Data
+@Value
 public class DataProcessingRequest {
     @NotBlank
-    private String data;
+    String data;
     @NotBlank
-    private String additionalDataId;
+    String additionalDataId;
 
     public DataForProcessing getDataForProcessing() {
         return new DataForProcessing(data, additionalDataId);

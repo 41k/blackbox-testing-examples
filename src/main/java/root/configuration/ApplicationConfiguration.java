@@ -2,7 +2,6 @@ package root.configuration;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -25,7 +24,6 @@ import java.util.Map;
 import static java.lang.Boolean.TRUE;
 
 @Configuration
-@EnableCaching
 @EnableConfigurationProperties(ThirdPartyServiceProperties.class)
 public class ApplicationConfiguration {
 

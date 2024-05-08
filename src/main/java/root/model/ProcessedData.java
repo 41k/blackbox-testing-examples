@@ -21,7 +21,11 @@ public class ProcessedData {
     @Id
     private String id;
     @NotNull
-    private String data;
+    private String dataForProcessing;
+    @NotNull
+    private String additionalDataId;
+    @NotNull
+    private String processingResult;
     @NotNull
     private Instant processingTimestamp;
 }

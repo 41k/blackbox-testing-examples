@@ -15,7 +15,7 @@ spring:
     bindings:
       dataProcessingFlow-in-0:
         destination: topic-a
-        group: ${spring.application.name}_topic_a
+        group: ${spring.application.name}_topic-a
 
 kafka.producers:
   topic:
@@ -30,3 +30,7 @@ thirdparty-service:
   read-timeout-millis: 10000
   retry-max: 2
   retry-backoff-millis: 50
+
+cache:
+  duration-in-seconds:
+    additional-data: 1

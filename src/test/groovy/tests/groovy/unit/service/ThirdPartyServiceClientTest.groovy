@@ -1,4 +1,4 @@
-package unit.service
+package tests.groovy.unit.service
 
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -12,17 +12,19 @@ import root.dto.ThirdPartyServiceResponse
 import root.service.ThirdPartyServiceClient
 import spock.lang.Specification
 
-import static TestConstants.*
 import static org.springframework.http.HttpStatus.*
+import static tests.groovy.TestConstants.ADDITIONAL_DATA
+import static tests.groovy.TestConstants.ADDITIONAL_DATA_ID
 
 class ThirdPartyServiceClientTest extends Specification {
 
-    public static final THIRD_PARTY_SERVICE_URL = 'http://third-party-service.com/additional-data/'
-    public static final ADDITIONAL_DATA_URI = URI.create(THIRD_PARTY_SERVICE_URL + ADDITIONAL_DATA_ID)
-    public static final THIRD_PARTY_SERVICE_RESPONSE =
-            new ResponseEntity(new ThirdPartyServiceResponse(additionalData: ADDITIONAL_DATA), OK)
+    private static final THIRD_PARTY_SERVICE_URL = 'http://third-party-service.com/additional-data/'
+    private static final ADDITIONAL_DATA_URI = URI.create(THIRD_PARTY_SERVICE_URL + ADDITIONAL_DATA_ID)
+    private static final THIRD_PARTY_SERVICE_RESPONSE =
+            new ResponseEntity(new ThirdPartyServiceResponse(ADDITIONAL_DATA), OK)
+    private static final N_RETRIES = 3;
 
-    private thirdPartyServiceProperties = new ThirdPartyServiceProperties(retryMax: 3, retryBackoffMillis: 50)
+    private thirdPartyServiceProperties = new ThirdPartyServiceProperties(retryMax: N_RETRIES, retryBackoffMillis: 50)
     private retryTemplate = ApplicationConfiguration.createRetryTemplate(thirdPartyServiceProperties)
     private restTemplate = Mock(RestTemplate)
 
@@ -33,7 +35,7 @@ class ThirdPartyServiceClientTest extends Specification {
         def additionalData = thirdPartyServiceClient.getAdditionalData(ADDITIONAL_DATA_ID)
 
         then:
-        3 * restTemplate.exchange(ADDITIONAL_DATA_URI, HttpMethod.GET, HttpEntity.EMPTY, ThirdPartyServiceResponse) >>
+        N_RETRIES * restTemplate.exchange(ADDITIONAL_DATA_URI, HttpMethod.GET, HttpEntity.EMPTY, ThirdPartyServiceResponse) >>
                 { throw new HttpServerErrorException(INTERNAL_SERVER_ERROR) } >>
                 { throw new HttpServerErrorException(INTERNAL_SERVER_ERROR) } >>
                 THIRD_PARTY_SERVICE_RESPONSE
@@ -48,7 +50,7 @@ class ThirdPartyServiceClientTest extends Specification {
         thirdPartyServiceClient.getAdditionalData(ADDITIONAL_DATA_ID)
 
         then:
-        3 * restTemplate.exchange(ADDITIONAL_DATA_URI, HttpMethod.GET, HttpEntity.EMPTY, ThirdPartyServiceResponse) >> {
+        N_RETRIES * restTemplate.exchange(ADDITIONAL_DATA_URI, HttpMethod.GET, HttpEntity.EMPTY, ThirdPartyServiceResponse) >> {
             throw new HttpServerErrorException(INTERNAL_SERVER_ERROR)
         }
         0 * _

@@ -1,9 +1,11 @@
-package blackbox
+package tests.groovy.blackbox
 
-import static TestConstants.*
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.apache.http.HttpStatus.*
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import static tests.groovy.TestConstants.*
 
 class Flow1BlackboxTest extends BaseBlackboxTest {
 
@@ -21,13 +23,12 @@ class Flow1BlackboxTest extends BaseBlackboxTest {
         and: 'mock for successful additional data retrieval from third-party service'
         stubFor(get(urlPathEqualTo(THIRD_PARTY_SERVICE_ADDITIONAL_DATA_URI))
                 .willReturn(aResponse()
-                        .withStatus(200)
-                        .withBody(THIRD_PARTY_SERVICE_RESPONSE_BODY)
-                        .withHeader('Content-Type', JSON_CONTENT_TYPE)
-                        .withHeader('Connection', 'close')))
+                        .withStatus(SC_OK)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBody(THIRD_PARTY_SERVICE_RESPONSE_BODY)))
 
         when: 'data processing request is sent'
-        given().contentType(JSON_CONTENT_TYPE)
+        given().contentType(APPLICATION_JSON_VALUE)
                 .body(DATA_PROCESSING_REQUEST_BODY)
                 .when()
                 .post(DATA_PROCESSING_URL)
@@ -37,16 +38,15 @@ class Flow1BlackboxTest extends BaseBlackboxTest {
         then: 'processed data is persisted'
         def processedData = processedDataRepository.findAll()
         processedData.size() == 1
-        processedData.get(0).data == PROCESSED_DATA_AS_STRING
-        processedData.get(0).processingTimestamp == PROCESSING_TIMESTAMP
+        processedData.get(0).equals(PROCESSED_DATA)
 
-        and: 'processed data is sent to subsequent kafka topic for further processing'
-        dataProcessingOutputKafkaConsumer.waitAndAssertMessageSent(PROCESSED_DATA_MESSAGE_AS_JSON)
+        and: 'processed data is sent to output kafka topic for further processing'
+        dataProcessingOutputKafkaConsumer.waitAndAssertMessagesSent([PROCESSED_DATA_MESSAGE])
     }
 
     def 'should get 400 response code for incorrect data processing request'() {
         expect:
-        given().contentType(JSON_CONTENT_TYPE)
+        given().contentType(APPLICATION_JSON_VALUE)
                 .body('{}')
                 .when()
                 .post(DATA_PROCESSING_URL)
@@ -61,11 +61,10 @@ class Flow1BlackboxTest extends BaseBlackboxTest {
         and: 'mock for failed additional data retrieval from third-party service'
         stubFor(get(urlPathEqualTo(THIRD_PARTY_SERVICE_ADDITIONAL_DATA_URI))
                 .willReturn(aResponse()
-                        .withStatus(500)
-                        .withHeader('Connection', 'close')))
+                        .withStatus(SC_INTERNAL_SERVER_ERROR)))
 
         when: 'data processing request is sent'
-        given().contentType(JSON_CONTENT_TYPE)
+        given().contentType(APPLICATION_JSON_VALUE)
                 .body(DATA_PROCESSING_REQUEST_BODY)
                 .when()
                 .post(DATA_PROCESSING_URL)
@@ -75,7 +74,7 @@ class Flow1BlackboxTest extends BaseBlackboxTest {
         then: 'no processed data is persisted'
         processedDataRepository.findAll().isEmpty()
 
-        and: 'no processed data is sent to subsequent kafka topic for further processing'
+        and: 'no processed data is sent to output kafka topic for further processing'
         dataProcessingOutputKafkaConsumer.assertNoMessageSent()
     }
 }

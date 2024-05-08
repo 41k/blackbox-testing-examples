@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static root.configuration.properties.CacheProperties.ADDITIONAL_DATA_CACHE_NAME;
 
 @RequiredArgsConstructor
 public class ThirdPartyServiceClient {
@@ -20,7 +21,7 @@ public class ThirdPartyServiceClient {
     private final RetryTemplate retryTemplate;
     private final RestTemplate restTemplate;
 
-    @Cacheable(value = "additionalData")
+    @Cacheable(value = ADDITIONAL_DATA_CACHE_NAME)
     public String getAdditionalData(String id) {
         var uri = URI.create(url + id);
         var response = retryTemplate.execute(retryContext ->

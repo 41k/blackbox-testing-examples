@@ -30,7 +30,7 @@ public class ExceptionHandlingControllerAdvice {
     }
 
     private String formMessage(String messageFormat, Exception e) {
-        var errorMessage = String.format(messageFormat, e.getMessage());
+        var errorMessage = messageFormat.formatted(e.getMessage());
         log.error(errorMessage, e);
         return errorMessage;
     }

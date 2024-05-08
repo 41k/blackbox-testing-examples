@@ -10,7 +10,13 @@ databaseChangeLog:
                   name:  id
                   type:  varchar(255)
               - column:
-                  name:  data
+                  name:  data_for_processing
+                  type:  varchar(255)
+              - column:
+                  name:  additional_data_id
+                  type:  varchar(255)
+              - column:
+                  name:  processing_result
                   type:  varchar(255)
               - column:
                   name:  processing_timestamp

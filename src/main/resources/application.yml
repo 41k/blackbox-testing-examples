@@ -5,9 +5,6 @@ spring:
     url: jdbc:mariadb://localhost:3306/app_db
     username: root
     password: root
-  cache:
-    cache-names: additionalData
-    caffeine.spec: expireAfterWrite=5m
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     open-in-view: false

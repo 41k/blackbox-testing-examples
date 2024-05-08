@@ -1,4 +1,4 @@
-package unit.service
+package tests.groovy.unit.service
 
 import org.springframework.kafka.core.KafkaTemplate
 import root.repository.ProcessedDataRepository
@@ -7,7 +7,7 @@ import root.service.IdGenerator
 import root.service.ThirdPartyServiceClient
 import spock.lang.Specification
 
-import static TestConstants.*
+import static tests.groovy.TestConstants.*
 
 class DataProcessingServiceTest extends Specification {
 
@@ -27,7 +27,7 @@ class DataProcessingServiceTest extends Specification {
         1 * thirdPartyServiceClient.getAdditionalData(ADDITIONAL_DATA_ID) >> ADDITIONAL_DATA
         1 * idGenerator.generate() >> PROCESSED_DATA_ID
         1 * processedDataRepository.save(PROCESSED_DATA)
-        1 * dataProcessingOutputKafkaProducer.sendDefault(PROCESSED_DATA_MESSAGE)
+        1 * dataProcessingOutputKafkaProducer.sendDefault(PROCESSED_DATA_ID, PROCESSED_DATA_MESSAGE_VALUE)
         0 * _
     }
 }

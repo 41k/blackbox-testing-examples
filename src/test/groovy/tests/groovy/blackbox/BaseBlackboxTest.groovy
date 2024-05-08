@@ -1,17 +1,17 @@
-package blackbox
+package tests.groovy.blackbox
 
-import blackbox.configuration.BlackboxTestConfiguration
-import blackbox.steps.KafkaConsumerSteps
 import io.restassured.RestAssured
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import root.ApplicationRunner
 import root.repository.ProcessedDataRepository
 import spock.lang.Specification
+import tests.groovy.blackbox.configuration.BlackboxTestConfiguration
+import tests.groovy.blackbox.steps.KafkaConsumerSteps
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
@@ -38,5 +38,6 @@ abstract class BaseBlackboxTest extends Specification {
         cacheManager.cacheNames.each { cacheName -> cacheManager.getCache(cacheName).clear() }
         processedDataRepository.deleteAll()
         processedDataRepository.flush()
+        dataProcessingOutputKafkaConsumer.cleanTopic()
     }
 }

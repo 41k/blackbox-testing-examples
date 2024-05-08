@@ -21,14 +21,19 @@ public class DataProcessingService {
 
     @Transactional
     public void process(DataForProcessing dataForProcessing) {
-        var additionalData = thirdPartyServiceClient.getAdditionalData(dataForProcessing.getAdditionalDataId());
-        var processedData = dataForProcessing.getData().toUpperCase() + " | " + additionalData.toUpperCase();
+        var additionalDataId = dataForProcessing.getAdditionalDataId();
+        var additionalData = thirdPartyServiceClient.getAdditionalData(additionalDataId);
+        var rawData = dataForProcessing.getData();
+        var processedData = rawData.toUpperCase() + " | " + additionalData.toUpperCase();
+        var processedDataId = idGenerator.generate();
         processedDataRepository.save(
                 ProcessedData.builder()
-                        .id(idGenerator.generate())
-                        .data(processedData)
+                        .id(processedDataId)
+                        .dataForProcessing(rawData)
+                        .additionalDataId(additionalDataId)
+                        .processingResult(processedData)
                         .processingTimestamp(clock.instant())
                         .build());
-        dataProcessingOutputKafkaProducer.sendDefault(new ProcessedDataMessage(processedData));
+        dataProcessingOutputKafkaProducer.sendDefault(processedDataId, new ProcessedDataMessage(processedData));
     }
 }
